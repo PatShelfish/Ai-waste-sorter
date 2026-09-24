@@ -134,6 +134,15 @@
                 📷 SCAN WASTE
             </button>
 
+            <input
+                type="file"
+                id="cameraInput"
+                accept="image/*"
+                capture="environment"
+                style="display:none;"
+                oncahnge="showPhoto(event)"
+            >
+            
         </div>
 
 
@@ -174,20 +183,35 @@
 
         function startCamera() {
 
-            alert(
-                "Camera/AI connection will be added in Stage 2."
-            );
+           document.getElementById("cameraInput").click();
 
         }
 
 
-        function resetApp() {
+       function showPhoto(event) {
 
-            document.getElementById("result")
-                    .style.display = "none";
+           const file = event.target.files[0];
 
-        }
+           if (!file) {
+               return;
+           }
 
+           const imageURL = URL.createObjectURL(file);
+
+           alert("Photo captured successfully!");
+
+      }
+
+
+      function resetApp() {
+
+         document.getElementById("result")
+                 .style.display = "none";
+
+     }
+
+      
+        
     </script>
 
 </body>
