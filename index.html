@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Waste Sorter</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f7f3;
+            text-align: center;
+        }
+
+        .header {
+            background: #166534;
+            color: white;
+            padding: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .camera-box {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .camera-icon {
+            font-size: 70px;
+            margin: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            background: #166534;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #14532d;
+        }
+
+        .result {
+            display: none;
+            margin-top: 20px;
+            padding: 25px;
+            border-radius: 20px;
+            background: white;
+        }
+
+        .result h2 {
+            font-size: 32px;
+        }
+
+        .bin-message {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .reset {
+            margin-top: 15px;
+            background: #555;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding: 20px;
+            color: #555;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>♻️ AI Waste Sorter</h1>
+
+        <p>Artificial Intelligence for Better Life</p>
+
+    </div>
+
+
+    <div class="container">
+
+        <div class="camera-box">
+
+            <div class="camera-icon">
+                📷
+            </div>
+
+            <h2>Identify Your Waste</h2>
+
+            <p>
+                Take a photograph of a waste item
+                and let AI suggest the appropriate category.
+            </p>
+
+            <button onclick="startCamera()">
+                📷 SCAN WASTE
+            </button>
+
+        </div>
+
+
+        <div id="result" class="result">
+
+            <h2 id="binTitle">
+                🟢 GREEN BIN
+            </h2>
+
+            <p id="itemName">
+                Banana Peel
+            </p>
+
+            <p class="bin-message" id="message">
+                Please throw it in the GREEN bin.
+            </p>
+
+            <button class="reset"
+                    onclick="resetApp()">
+                📷 SCAN ANOTHER ITEM
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+
+        AI-assisted waste classification project
+        <br>
+        Class 8 School Project
+
+    </footer>
+
+
+    <script>
+
+        function startCamera() {
+
+            alert(
+                "Camera/AI connection will be added in Stage 2."
+            );
+
+        }
+
+
+        function resetApp() {
+
+            document.getElementById("result")
+                    .style.display = "none";
+
+        }
+
+    </script>
+
+</body>
+
+</html>
