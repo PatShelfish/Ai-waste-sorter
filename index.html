@@ -140,7 +140,6 @@
                 accept="image/*"
                 capture="environment"
                 style="display:none;"
-                oncahnge="showPhoto(event)"
             >
             
         </div>
@@ -192,27 +191,31 @@
     <script>
 
         function startCamera() {
-
-           document.getElementById("cameraInput").click();
+            const cameraInput = document.getElementById("cameraInput");
+            cameraInput.value = "";
+            cameraInput.click();
 
         }
 
 
-       function showPhoto(event) {
+       document.getElementById("cameraInput").addEventListener("change", function(event) {
 
-           const file = event.target.files[0];
+            const file = event.target.files[0];
 
-           if (!file) {
-               return;
-           }
+            if (!file) {
+                return;
+            }
 
-           const imageURL = URL.createObjectURL(file);
+            const imageURL = URL.createObjectURL(file);
 
-            document.getElementById("capturedImage").src = imageURL;
+            const capturedImage = document.getElementById("capturedImage");
+
+            capturedImage.src = imageURL;
 
             document.getElementById("photoPreview").style.display = "block";
 
-      }
+      });
+
 
 
       function resetApp() {
