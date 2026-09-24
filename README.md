@@ -1,1 +1,1 @@
-# ai-waste-sorter
+# Ai-waste-sorter
