@@ -145,6 +145,16 @@
             
         </div>
 
+        <div id="photoPreview" style="display:none; margin-top:20px;">
+
+            <h3>📷 Captured Waste</h3>
+
+            <img
+                id="capturedImage"
+                src=""
+                alt="Captured waste"
+                style="width:100%; max-width:400px; border-radius:15px;"
+           >
 
         <div id="result" class="result">
 
@@ -198,7 +208,9 @@
 
            const imageURL = URL.createObjectURL(file);
 
-           alert("Photo captured successfully!");
+            document.getElementById("capturedImage").src = imageURL;
+
+            document.getElementById("photoPreview").style.display = "block";
 
       }
 
