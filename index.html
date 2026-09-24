@@ -72,9 +72,14 @@
             background: #14532d;
         }
 
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
         .status {
             margin-top: 15px;
-            font-size: 14px;
+            font-size: 15px;
             color: #555;
         }
 
@@ -103,6 +108,12 @@
 
         .result h2 {
             font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .item-name {
+            font-size: 22px;
+            font-weight: bold;
         }
 
         .bin-message {
@@ -139,9 +150,8 @@
     </div>
 
 
-    <!-- MAIN CONTENT -->
-
     <div class="container">
+
 
         <!-- CAMERA SECTION -->
 
@@ -155,15 +165,19 @@
 
             <p>
                 Take a photograph of a waste item
-                and let AI suggest the appropriate category.
+                and let AI identify its category.
             </p>
 
-            <button onclick="startCamera()">
+            <button
+                id="scanButton"
+                onclick="startCamera()">
+
                 📷 SCAN WASTE
+
             </button>
 
 
-            <!-- Hidden camera input -->
+            <!-- Camera input -->
 
             <input
                 type="file"
@@ -174,10 +188,10 @@
             >
 
 
-            <!-- Status message -->
-
             <div id="status" class="status">
+
                 Ready to scan.
+
             </div>
 
         </div>
@@ -185,7 +199,9 @@
 
         <!-- PHOTO PREVIEW -->
 
-        <div id="photoPreview" class="photo-preview">
+        <div
+            id="photoPreview"
+            class="photo-preview">
 
             <h3>📷 Captured Waste</h3>
 
@@ -198,27 +214,32 @@
         </div>
 
 
-        <!-- RESULT SECTION -->
+        <!-- AI RESULT -->
 
-        <div id="result" class="result">
+        <div
+            id="result"
+            class="result">
 
             <h2 id="binTitle">
                 🟢 GREEN BIN
             </h2>
 
-            <p id="itemName">
-                Banana Peel
+            <p
+                id="itemName"
+                class="item-name">
             </p>
 
-            <p class="bin-message" id="message">
-                Please throw it in the GREEN bin.
+            <p
+                id="message"
+                class="bin-message">
             </p>
 
             <button
                 class="reset"
-                onclick="resetApp()"
-            >
+                onclick="resetApp()">
+
                 📷 SCAN ANOTHER ITEM
+
             </button>
 
         </div>
@@ -237,11 +258,20 @@
     </footer>
 
 
-    <!-- JAVASCRIPT -->
-
     <script>
 
-        // Open the phone camera
+
+        /*
+         * YOUR GEMINI BACKEND
+         */
+
+        const BACKEND_URL =
+            "https://script.google.com/macros/s/AKfycbwor3lrZ5iE7Ob78pGXIM-CxgdPyJIPE_KJBj1ZUfXfTdWcnzHoWexjTxLhdCFszbZyGg/exec";
+
+
+        /*
+         * OPEN PHONE CAMERA
+         */
 
         function startCamera() {
 
@@ -251,74 +281,463 @@
             const status =
                 document.getElementById("status");
 
-            // Clear previous selection
-
             cameraInput.value = "";
 
-            status.innerText = "Opening camera...";
-
-            // Open camera
+            status.innerText =
+                "📷 Opening camera...";
 
             cameraInput.click();
         }
 
 
-        // Detect when the phone sends the photo back
+        /*
+         * CAMERA PHOTO RECEIVED
+         */
 
         document
             .getElementById("cameraInput")
-            .addEventListener("change", function(event) {
+            .addEventListener(
+                "change",
+                function(event) {
 
-                const file = event.target.files[0];
+                    const file =
+                        event.target.files[0];
 
-                const status =
-                    document.getElementById("status");
+                    if (!file) {
+
+                        document.getElementById("status")
+                            .innerText =
+                            "No photo received.";
+
+                        return;
+                    }
 
 
-                // If no photo was received
+                    /*
+                     * Show original photo
+                     */
 
-                if (!file) {
+                    const imageURL =
+                        URL.createObjectURL(file);
 
-                    status.innerText =
-                        "No photo was received. Please try again.";
+                    document
+                        .getElementById("capturedImage")
+                        .src = imageURL;
 
-                    return;
+                    document
+                        .getElementById("photoPreview")
+                        .style.display = "block";
+
+
+                    /*
+                     * Start AI analysis
+                     */
+
+                    analyzeImage(file);
+
+                }
+            );
+
+
+        /*
+         * RESIZE IMAGE
+         *
+         * This makes the photo smaller
+         * before sending it to Gemini.
+         */
+
+        function resizeImage(file) {
+
+            return new Promise(
+                function(resolve, reject) {
+
+                    const image =
+                        new Image();
+
+                    const reader =
+                        new FileReader();
+
+
+                    reader.onload =
+                        function(e) {
+
+                            image.src =
+                                e.target.result;
+
+                        };
+
+
+                    image.onload =
+                        function() {
+
+                            const MAX_SIZE = 1280;
+
+                            let width =
+                                image.width;
+
+                            let height =
+                                image.height;
+
+
+                            if (width > height) {
+
+                                if (width > MAX_SIZE) {
+
+                                    height =
+                                        height *
+                                        MAX_SIZE /
+                                        width;
+
+                                    width =
+                                        MAX_SIZE;
+
+                                }
+
+                            } else {
+
+                                if (height > MAX_SIZE) {
+
+                                    width =
+                                        width *
+                                        MAX_SIZE /
+                                        height;
+
+                                    height =
+                                        MAX_SIZE;
+
+                                }
+
+                            }
+
+
+                            const canvas =
+                                document.createElement(
+                                    "canvas"
+                                );
+
+
+                            canvas.width =
+                                width;
+
+                            canvas.height =
+                                height;
+
+
+                            const ctx =
+                                canvas.getContext(
+                                    "2d"
+                                );
+
+
+                            ctx.drawImage(
+                                image,
+                                0,
+                                0,
+                                width,
+                                height
+                            );
+
+
+                            /*
+                             * Convert to JPEG
+                             */
+
+                            const dataURL =
+                                canvas.toDataURL(
+                                    "image/jpeg",
+                                    0.75
+                                );
+
+
+                            resolve(dataURL);
+
+                        };
+
+
+                    image.onerror =
+                        reject;
+
+
+                    reader.onerror =
+                        reject;
+
+
+                    reader.readAsDataURL(file);
+
+                }
+            );
+        }
+
+
+        /*
+         * SEND PHOTO TO GEMINI
+         */
+
+        async function analyzeImage(file) {
+
+            const status =
+                document.getElementById("status");
+
+            const scanButton =
+                document.getElementById(
+                    "scanButton"
+                );
+
+
+            try {
+
+                scanButton.disabled = true;
+
+                status.innerText =
+                    "🤖 AI is analyzing the waste...";
+
+
+                /*
+                 * Resize photograph
+                 */
+
+                const dataURL =
+                    await resizeImage(file);
+
+
+                /*
+                 * Remove:
+                 *
+                 * data:image/jpeg;base64,
+                 *
+                 * leaving only Base64 data
+                 */
+
+                const base64Image =
+                    dataURL.split(",")[1];
+
+
+                /*
+                 * Send to Apps Script
+                 *
+                 * text/plain avoids an unnecessary
+                 * browser preflight request.
+                 */
+
+                const response =
+                    await fetch(
+                        BACKEND_URL,
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "text/plain;charset=utf-8"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    image:
+                                        base64Image,
+
+                                    mimeType:
+                                        "image/jpeg"
+
+                                })
+
+                        }
+                    );
+
+
+                /*
+                 * Read AI response
+                 */
+
+                const result =
+                    await response.json();
+
+
+                console.log(
+                    "AI response:",
+                    result
+                );
+
+
+                if (!result.success) {
+
+                    throw new Error(
+                        result.error ||
+                        "AI analysis failed."
+                    );
+
                 }
 
 
-                // Create a temporary URL for the photo
+                /*
+                 * Show AI result
+                 */
 
-                const imageURL =
-                    URL.createObjectURL(file);
+                showResult(
+                    result.category,
+                    result.item
+                );
 
-
-                // Display the photo
-
-                const capturedImage =
-                    document.getElementById("capturedImage");
-
-                capturedImage.src = imageURL;
-
-
-                // Show the preview section
-
-                document
-                    .getElementById("photoPreview")
-                    .style.display = "block";
-
-
-                // Show success message
 
                 status.innerText =
-                    "✅ Photo received successfully!";
+                    "✅ AI analysis complete!";
 
 
-                console.log("Photo received:", file);
+            } catch (error) {
 
-            });
+                console.error(error);
 
 
-        // Reset the application
+                status.innerText =
+                    "❌ AI analysis failed.";
+
+
+                alert(
+                    "AI analysis failed.\n\n" +
+                    error.message
+                );
+
+
+            } finally {
+
+                scanButton.disabled = false;
+
+            }
+
+        }
+
+
+        /*
+         * CONVERT AI CATEGORY
+         * INTO BIN RECOMMENDATION
+         */
+
+        function showResult(
+            category,
+            item
+        ) {
+
+            const binTitle =
+                document.getElementById(
+                    "binTitle"
+                );
+
+            const itemName =
+                document.getElementById(
+                    "itemName"
+                );
+
+            const message =
+                document.getElementById(
+                    "message"
+                );
+
+
+            itemName.innerText =
+                "AI identified: " + item;
+
+
+            const cleanCategory =
+                category
+                    .toUpperCase()
+                    .trim();
+
+
+            /*
+             * WET / ORGANIC
+             */
+
+            if (
+                cleanCategory.includes(
+                    "WET"
+                ) ||
+                cleanCategory.includes(
+                    "ORGANIC"
+                )
+            ) {
+
+                binTitle.innerText =
+                    "🟢 GREEN BIN";
+
+                message.innerText =
+                    "Please throw it in the GREEN bin.";
+
+            }
+
+
+            /*
+             * DRY / RECYCLABLE
+             */
+
+            else if (
+                cleanCategory.includes(
+                    "DRY"
+                ) ||
+                cleanCategory.includes(
+                    "RECYCLABLE"
+                )
+            ) {
+
+                binTitle.innerText =
+                    "🔵 BLUE BIN";
+
+                message.innerText =
+                    "Please throw it in the BLUE bin.";
+
+            }
+
+
+            /*
+             * HAZARDOUS
+             */
+
+            else if (
+                cleanCategory.includes(
+                    "HAZARDOUS"
+                )
+            ) {
+
+                binTitle.innerText =
+                    "🔴 HAZARDOUS WASTE";
+
+                message.innerText =
+                    "Please use the appropriate hazardous/e-waste collection system.";
+
+            }
+
+
+            /*
+             * OTHER
+             */
+
+            else {
+
+                binTitle.innerText =
+                    "⚫ OTHER / REJECT";
+
+                message.innerText =
+                    "Please follow your local waste-disposal instructions.";
+
+            }
+
+
+            /*
+             * Show result box
+             */
+
+            document
+                .getElementById("result")
+                .style.display = "block";
+
+        }
+
+
+        /*
+         * RESET
+         */
 
         function resetApp() {
 
@@ -339,7 +758,8 @@
 
             document
                 .getElementById("status")
-                .innerText = "Ready to scan.";
+                .innerText =
+                "Ready to scan.";
 
         }
 
