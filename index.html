@@ -72,6 +72,27 @@
             background: #14532d;
         }
 
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .photo-preview {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 20px;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            margin-top: 10px;
+        }
+
         .result {
             display: none;
             margin-top: 20px;
@@ -104,7 +125,10 @@
     </style>
 </head>
 
+
 <body>
+
+    <!-- HEADER -->
 
     <div class="header">
 
@@ -115,7 +139,11 @@
     </div>
 
 
+    <!-- MAIN CONTENT -->
+
     <div class="container">
+
+        <!-- CAMERA SECTION -->
 
         <div class="camera-box">
 
@@ -134,17 +162,30 @@
                 📷 SCAN WASTE
             </button>
 
+
+            <!-- Hidden camera input -->
+
             <input
                 type="file"
                 id="cameraInput"
                 accept="image/*"
-                capture="camera"
-                style="display:block; margin:20px auto;"
+                capture="environment"
+                style="display:none;"
             >
-            
+
+
+            <!-- Status message -->
+
+            <div id="status" class="status">
+                Ready to scan.
+            </div>
+
         </div>
 
-        <div id="photoPreview" style="display:none; margin-top:20px;">
+
+        <!-- PHOTO PREVIEW -->
+
+        <div id="photoPreview" class="photo-preview">
 
             <h3>📷 Captured Waste</h3>
 
@@ -152,8 +193,12 @@
                 id="capturedImage"
                 src=""
                 alt="Captured waste"
-                style="width:100%; max-width:400px; border-radius:15px;"
-           >
+            >
+
+        </div>
+
+
+        <!-- RESULT SECTION -->
 
         <div id="result" class="result">
 
@@ -169,8 +214,10 @@
                 Please throw it in the GREEN bin.
             </p>
 
-            <button class="reset"
-                    onclick="resetApp()">
+            <button
+                class="reset"
+                onclick="resetApp()"
+            >
                 📷 SCAN ANOTHER ITEM
             </button>
 
@@ -178,6 +225,8 @@
 
     </div>
 
+
+    <!-- FOOTER -->
 
     <footer>
 
@@ -188,45 +237,112 @@
     </footer>
 
 
+    <!-- JAVASCRIPT -->
+
     <script>
 
-        function startCamera() {
-            const cameraInput = document.getElementById("cameraInput");
-            cameraInput.value = "";
-            cameraInput.click();
+        // Open the phone camera
 
+        function startCamera() {
+
+            const cameraInput =
+                document.getElementById("cameraInput");
+
+            const status =
+                document.getElementById("status");
+
+            // Clear previous selection
+
+            cameraInput.value = "";
+
+            status.innerText = "Opening camera...";
+
+            // Open camera
+
+            cameraInput.click();
         }
 
 
-       document.getElementById("cameraInput").addEventListener("change", function(event) {
+        // Detect when the phone sends the photo back
 
-            const file = event.target.files[0];
+        document
+            .getElementById("cameraInput")
+            .addEventListener("change", function(event) {
 
-            if (!file) {
-                return;
-            }
+                const file = event.target.files[0];
 
-            const imageURL = URL.createObjectURL(file);
-
-            const capturedImage = document.getElementById("capturedImage");
-
-            capturedImage.src = imageURL;
-
-            document.getElementById("photoPreview").style.display = "block";
-
-      });
+                const status =
+                    document.getElementById("status");
 
 
+                // If no photo was received
 
-      function resetApp() {
+                if (!file) {
 
-         document.getElementById("result")
-                 .style.display = "none";
+                    status.innerText =
+                        "No photo was received. Please try again.";
 
-     }
+                    return;
+                }
 
-      
-        
+
+                // Create a temporary URL for the photo
+
+                const imageURL =
+                    URL.createObjectURL(file);
+
+
+                // Display the photo
+
+                const capturedImage =
+                    document.getElementById("capturedImage");
+
+                capturedImage.src = imageURL;
+
+
+                // Show the preview section
+
+                document
+                    .getElementById("photoPreview")
+                    .style.display = "block";
+
+
+                // Show success message
+
+                status.innerText =
+                    "✅ Photo received successfully!";
+
+
+                console.log("Photo received:", file);
+
+            });
+
+
+        // Reset the application
+
+        function resetApp() {
+
+            document
+                .getElementById("photoPreview")
+                .style.display = "none";
+
+
+            document
+                .getElementById("result")
+                .style.display = "none";
+
+
+            document
+                .getElementById("capturedImage")
+                .src = "";
+
+
+            document
+                .getElementById("status")
+                .innerText = "Ready to scan.";
+
+        }
+
     </script>
 
 </body>
